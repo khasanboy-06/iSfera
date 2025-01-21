@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import (ProductDetailAPIView, CategoryAPIView, 
-                    ProductListAPIView, AccessuaryAPIView,
+from .views import (ProductDetailAPIView, CategoryAPIView,
+                    ProductListAPIView, AccessoryAPIView,
                     ProductSetAPIView, ProductAttributeAPIView,
                     ClientAPIView, RepairServiceAPIView,
                     ServiceCategoryAPIView, ServiceProductAPIView,
@@ -14,7 +14,7 @@ urlpatterns = [
     path('product/<int:pk>/', ProductDetailAPIView.as_view()),
     path('product-attribute/', ProductAttributeAPIView.as_view()),
     path('productset/', ProductSetAPIView.as_view()),
-    path('accessuary/', AccessuaryAPIView.as_view()),
+    path('accessuary/', AccessoryAPIView.as_view()),
     
     path('service_category/', ServiceCategoryAPIView.as_view()),
     path('service-product/', ServiceProductAPIView.as_view()),

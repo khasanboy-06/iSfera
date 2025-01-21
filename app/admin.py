@@ -1,23 +1,23 @@
 from django.contrib import admin
 
-from .models import (Category, Product, ProductAttribute, 
-                     ProductMemoryPrice, ProductImage, Memory, PromoCode, 
+from .models import (Category, Product, ProductAttribute,
+                     ProductMemoryPrice, ProductImage, Memory, PromoCode,
                      Order, OrderProduct, ProductSet, OrderProductSet,
-                     Client, RepairService, DeviceRepair, Accessuary, AttributeType)
+                     Client, RepairService, DeviceRepair, Accessory, AttributeType)
 
-admin.site.register([Category, 
-                     Product, 
-                     ProductAttribute, 
-                     ProductMemoryPrice, 
-                     ProductImage, 
+admin.site.register([Category,
+                     Product,
+                     ProductAttribute,
+                     ProductMemoryPrice,
+                     ProductImage,
                      Memory,
-                     PromoCode, 
-                     Order, 
-                     OrderProduct, 
-                     ProductSet, 
+                     PromoCode,
+                     Order,
+                     OrderProduct,
+                     ProductSet,
                      OrderProductSet,
-                     Client, 
-                     RepairService, 
+                     Client,
+                     RepairService,
                      DeviceRepair,
-                     Accessuary,
+                     Accessory,
                      AttributeType])
