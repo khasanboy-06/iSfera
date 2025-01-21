@@ -3,17 +3,10 @@ from rest_framework.views import APIView, Response
 from rest_framework import status
 from django.utils import timezone
 
-from .serializers import (ProductDetailSerializer, CategorySerializer, 
-                          ProductListSerializer, AccessuarySerializer,
-                          ProductSetSerializer, ProductAttributeSerializer,
-                          ClientSerializer, RepairServiceSerializer,
-                          ServiceCategorySerializer, ServiceProductSerializer, 
-                          DeviceRepairSerializer, OrderSerializer,
-                          PromoCodeSerializer, PromoCodeCheckSerializer)
 
-from .models import (Product, Category, Accessuary,
-                     ProductSet, ProductAttribute, Client, RepairService,
-                     DeviceRepair, Order, PromoCode)
+from .serializers import *
+
+from .models import *
 
 class CategoryAPIView(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -99,9 +92,10 @@ class DeviceRepairAPIView(generics.CreateAPIView):
     serializer_class = DeviceRepairSerializer
 
 
-class OrderAPIView(generics.ListCreateAPIView):
+class OrderCreateAPIView(generics.CreateAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    serializer_class = OrderCreateSerializer
+
 
 class PromoCodeAPIView(APIView):
     def post(self, request):
@@ -116,9 +110,16 @@ class PromoCodeAPIView(APIView):
                 data={"message": "Promo-kod mavjud emas yoki yaroqsiz."},
                 status=status.HTTP_400_BAD_REQUEST
             )    
-        if amount > base_promo_code.min_amount:
+        if amount < base_promo_code.min_amount:
             return Response(
                 {"message": "Bu promo-kod chegirma limitidan oshib ketdi."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        timezone_date = timezone.datetime.now().date()
+        promo_code_date = base_promo_code.expiry_date 
+        if promo_code_date < timezone_date:
+            return Response(
+                {"message": "Bu promo-kod tugatilgan."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         return Response(data={

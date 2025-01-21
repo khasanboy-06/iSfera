@@ -5,7 +5,8 @@ from .views import (ProductDetailAPIView, CategoryAPIView,
                     ProductSetAPIView, ProductAttributeAPIView,
                     ClientAPIView, RepairServiceAPIView,
                     ServiceCategoryAPIView, ServiceProductAPIView,
-                    DeviceRepairAPIView, OrderAPIView, PromoCodeAPIView)
+                    DeviceRepairAPIView, PromoCodeAPIView,
+                    OrderCreateAPIView)
 
 urlpatterns = [
     path('categories/', CategoryAPIView.as_view()),
@@ -22,7 +23,8 @@ urlpatterns = [
     path('client/', ClientAPIView.as_view()),
     
 
-    path('order/', OrderAPIView.as_view()),
+    # path('order/', OrderAPIView.as_view()),
+    path('order-create/', OrderCreateAPIView.as_view()),
     path('promo-code/', PromoCodeAPIView.as_view()),
 
 ]

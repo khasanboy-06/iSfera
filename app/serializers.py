@@ -183,29 +183,41 @@ class DeviceRepairSerializer(serializers.ModelSerializer):
                   'repair_service',
                   'name',
                   'phone',
-                  )
-
-class PromoCodeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PromoCode
-        fields = ['name']
-
+                )
 
 class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderProduct
-        fields = ['product', 'count', 'color', 'memory']
+        fields = ['product', 'count']
 
-
-class OrderSerializer(serializers.ModelSerializer):
-    order_products = OrderProductSerializer(many=True)  
+class OrderCreateSerializer(serializers.ModelSerializer):
+    order_products = serializers.ListField(
+        child=serializers.JSONField(write_only=True),
+        required=False,
+        write_only=True,
+        allow_empty=True
+    )
     class Meta:
         model = Order
         fields = [
-            'id', 'full_name', 'phone_number', 'email', 'comment',
-            'status', 'delivery', 'promo_code', 'order_products'
+            'id',
+            'full_name',
+            'promo_code',
+            'phone_number',
+            'order_products',
         ]
+    def create(self, validated_data):
+        order_products = validated_data.pop("order_products")
+        instance = Order.objects.create(**validated_data)
+    
+        for order_product in order_products:
+            order_product = OrderProduct.objects.create(count=order_product.get('count'),
+                                                        product_id=order_product.get('product_id'),
+                                                        order_id=instance.id,
+                                                        color_id=order_product.get('color_id'),
+                                                        memory_id=order_product.get('memory_id'))
 
+        return instance
 
 class PromoCodeCheckSerializer(serializers.Serializer):
     amount = serializers.FloatField()
