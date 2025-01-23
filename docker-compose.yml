@@ -3,7 +3,7 @@ services:
     build:
       context: .
     container_name: "web-task"
-    command: python manage.py runserver 0.0.0.0:8001
+    command:  gunicorn --bind 0.0.0.0:8001 core.wsgi:application
     volumes:
       - .:/app
     ports:
