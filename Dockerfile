@@ -15,7 +15,5 @@ COPY . .
 
 EXPOSE 8000
 
-RUN poetry config virtualenvs.create false --local
-
 # Django serverni ishga tushirish
 #CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
