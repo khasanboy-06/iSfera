@@ -10,7 +10,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Nomi")
+    name = models.CharField(max_length=100)
     poster = models.ImageField(upload_to='poster/', null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='categories')
     description = models.TextField()
@@ -30,7 +30,7 @@ class ProductImage(models.Model):
 
 
 class Memory(models.Model):
-    volume = models.IntegerField(verbose_name="Xotira")
+    volume = models.IntegerField()
 
     def __str__(self):
         return str(self.volume)
@@ -38,8 +38,8 @@ class Memory(models.Model):
 
 class ProductMemoryPrice(models.Model):
     additional_price = models.IntegerField(default=0)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_memories')
-    memory = models.ForeignKey(Memory, on_delete=models.CASCADE, related_name='product_memories')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products_memories')
+    memory = models.ForeignKey(Memory, on_delete=models.CASCADE, related_name='product_memories_price')
 
     def __str__(self):
         return f"{self.product.name}"
@@ -67,7 +67,7 @@ class ProductAttribute(models.Model):
 
 
 class PromoCode(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name="Nomi")
+    name = models.CharField(max_length=100, unique=True)
     min_amount = models.DecimalField(max_digits=10, decimal_places=1)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     expiry_date = models.DateField(null=True, blank=True)
@@ -109,20 +109,18 @@ class Order(models.Model):
 
 
 class OrderProduct(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_products')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='products_order')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_products')
     count = models.IntegerField()
     color = models.ForeignKey(
         ProductImage,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,
         related_name='order_colors')
     memory = models.ForeignKey(
         ProductMemoryPrice,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,
         related_name='memory_products'
     )
 

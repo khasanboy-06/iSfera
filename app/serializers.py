@@ -9,30 +9,18 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image')
 
 
-class ProductMemorySerializer(serializers.ModelSerializer):
-    memory = serializers.IntegerField(source='memory.volume')
+class ProductMemoryPriceSerializer(serializers.ModelSerializer):
+    memory_volume = serializers.IntegerField(source='memory.volume', read_only=True)
 
     class Meta:
         model = models.ProductMemoryPrice
-        fields = ('id', 'memory')
+        fields = ['id', 'memory_volume']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductImage
-        fields = ('id', 'image')
-
-
-class AttributeTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.AttributeType
-        fields = ('id', 'name')
-
-
-class ProductAttributeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.ProductAttribute
-        fields = ('attribute', 'value',)
+        fields = ('id', 'image',)
 
 
 class ProductColorSerializer(serializers.ModelSerializer):
@@ -43,8 +31,8 @@ class ProductColorSerializer(serializers.ModelSerializer):
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     product_images = ProductImageSerializer(many=True)
-    product_colors = ProductColorSerializer(many=True)
-    product_memories = ProductMemorySerializer(many=True)
+    product_colors = ProductColorSerializer(source='product_images',many=True)
+    products_memories = ProductMemoryPriceSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Product
@@ -52,21 +40,21 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'id',
             'product_images',
             'product_colors',
-            'product_memories',
+            'products_memories',
             'name',
             'poster',
             'description',
             'price',
             'cash',
-            'expire_date',
+            'service_duration',
             'made_in',
             'category',
         )
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    product_colors = ProductColorSerializer(many=True)
-    product_memories = ProductMemorySerializer(many=True)
+    product_images = ProductImageSerializer(many=True)
+    product_colors = ProductColorSerializer(source='product_images',many=True)
 
     class Meta:
         model = models.Product
@@ -82,6 +70,16 @@ class AccessorySerializer(serializers.ModelSerializer):
             'image',
             'description',
         )
+class AttributeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AttributeType
+        fields = ('id', 'name')
+
+
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductAttribute
+        fields = ('attribute', 'value',)
 
 
 class ProductSetImageSerializer(serializers.ModelSerializer):
@@ -107,8 +105,8 @@ class ProductSetSerializer(serializers.ModelSerializer):
             'discount',
             'discount_price')
 
+
     def get_discount_price(self, obj):
-        # ToDo : this calculation is wrong, make it correct
         total_price = obj.product.price
         for accessory in obj.accessories.all():
             total_price += accessory.price
@@ -158,11 +156,17 @@ class DeviceRepairSerializer(serializers.ModelSerializer):
 class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.OrderProduct
-        fields = ['product', 'count']
+        fields = ['product', 'count', 'color', 'memory']
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
     order_products = serializers.ListField(
+        child=serializers.JSONField(write_only=True),
+        required=False,
+        write_only=True,
+        allow_empty=True
+    )
+    order_set = serializers.ListField(
         child=serializers.JSONField(write_only=True),
         required=False,
         write_only=True,
@@ -177,15 +181,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             'promo_code',
             'phone_number',
             'order_products',
-            # 'order_set' ToDo: add order_set
+            'order_set',
         ]
-
     def create(self, validated_data):
-        order_products = validated_data.pop("order_products")
+        order_products = validated_data.pop("order_products", [])
+        order_sets = validated_data.pop("order_set", [])
         instance = models.Order.objects.create(**validated_data)
-        items = [models.OrderProduct(order=instance, **order_product) for order_product in order_products]
-        if items:
-            models.OrderProduct.objects.bulk_create(items)
+        order_products_items = [models.OrderProduct(order=instance, **order_product) for order_product in order_products]
+        if order_products_items:
+            models.OrderProduct.objects.bulk_create(order_products_items)
+        if order_sets:
+            set_items = [models.OrderProductSet(order=instance, **order) for order in order_sets]
+            models.OrderProductSet.objects.bulk_create(set_items)
+            
         return instance
 
 
